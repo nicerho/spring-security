@@ -12,6 +12,7 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.jdbc.JdbcDaoImpl;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
@@ -21,7 +22,7 @@ import javax.xml.crypto.Data;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
-@Configuration
+//@Configuration
 public class BasicAuthSecurityConfiguration {
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -49,12 +50,16 @@ public class BasicAuthSecurityConfiguration {
     }
     @Bean
     public UserDetailsService userDetailsService(DataSource dataSource) {
-        var user = User.withUsername("Ho").password("{noop}1234").roles("USER").build();
-        var admin = User.withUsername("admin").password("{noop}1234").roles("ADMIN").build();
+        var user = User.withUsername("Ho").password("1234").passwordEncoder(str->passwordEncoder().encode(str)).roles("USER").build();
+        var admin = User.withUsername("admin").password("1234").passwordEncoder(str->passwordEncoder().encode(str)).roles("ADMIN").build();
         var jdbcUserDetailsManager = new JdbcUserDetailsManager(dataSource);
         jdbcUserDetailsManager.createUser(user);
         jdbcUserDetailsManager.createUser(admin);
         return jdbcUserDetailsManager;
-        
+
+    }
+    @Bean
+    public BCryptPasswordEncoder passwordEncoder(){
+        return new BCryptPasswordEncoder();
     }
 }
